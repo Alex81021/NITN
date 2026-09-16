@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Host Security Operations Center (SOC)</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1d20; color: #fff; padding: 20px; }
+        h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #24282e; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
+        th { background: #111; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .BENIGN { background: #28a745; color: white; }
+        .SUSPICIOUS { background: #ffc107; color: black; }
+        .MALICIOUS { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Host Security Console — Real-Time Log Monitoring</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Client IP</th>
+                <th>Path</th>
+                <th>User Agent</th>
+                <th>Bytes</th>
+                <th>Code</th>
+                <th>ML Threat Status</th>
+            </tr>
+        </thead>
+        <tbody id="logs-table"></tbody>
+    </table>
+
+    <script>
+        async function fetchLogs() {
+            const res = await fetch('/api/get-logs');
+            const data = await res.json();
+            const tbody = document.getElementById('logs-table');
+            tbody.innerHTML = '';
+            
+            data.logs.forEach(log => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${log.timestamp}</td>
+                        <td>${log.client_ip}</td>
+                        <td>${log.path}</td>
+                        <td>${log.user_agent}</td>
+                        <td>${log.bytes}</td>
+                        <td>${log.code}</td>
+                        <td><span class="badge ${log.status}">${log.status}</span></td>
+                    </tr>
+                `;
+            });
+        }
+        setInterval(fetchLogs, 2000); // Auto-refresh logs every 2 seconds
+        fetchLogs();
+    </script>
+</body>
+</html>
