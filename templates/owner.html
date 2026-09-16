@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Host Security Operations Center (SOC)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Operations Center (SOC) Console</title>
     <style>
         body { font-family: Arial, sans-serif; background: #1a1d20; color: #fff; padding: 20px; }
         h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #24282e; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
         th { background: #111; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge { padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
         .BENIGN { background: #28a745; color: white; }
         .SUSPICIOUS { background: #ffc107; color: black; }
         .MALICIOUS { background: #dc3545; color: white; }
@@ -34,24 +35,28 @@
 
     <script>
         async function fetchLogs() {
-            const res = await fetch('/api/get-logs');
-            const data = await res.json();
-            const tbody = document.getElementById('logs-table');
-            tbody.innerHTML = '';
-            
-            data.logs.forEach(log => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${log.timestamp}</td>
-                        <td>${log.client_ip}</td>
-                        <td>${log.path}</td>
-                        <td>${log.user_agent}</td>
-                        <td>${log.bytes}</td>
-                        <td>${log.code}</td>
-                        <td><span class="badge ${log.status}">${log.status}</span></td>
-                    </tr>
-                `;
-            });
+            try {
+                const res = await fetch('/api/get-logs');
+                const data = await res.json();
+                const tbody = document.getElementById('logs-table');
+                tbody.innerHTML = '';
+                
+                data.logs.forEach(log => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${log.timestamp}</td>
+                            <td>${log.client_ip}</td>
+                            <td>${log.path}</td>
+                            <td>${log.user_agent}</td>
+                            <td>${log.bytes}</td>
+                            <td>${log.code}</td>
+                            <td><span class="badge ${log.status}">${log.status}</span></td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error("Error updating logs:", err);
+            }
         }
         setInterval(fetchLogs, 2000); // Auto-refresh logs every 2 seconds
         fetchLogs();

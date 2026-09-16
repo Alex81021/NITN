@@ -2,38 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Public Visitor Portal</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 40px; text-align: center; }
         .card { background: white; padding: 30px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; font-weight: bold; }
         button.danger { background: #dc3545; }
+        button.warning { background: #ffc107; color: #000; }
+        #response { margin-top: 20px; font-weight: bold; font-size: 16px; min-height: 24px; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>Welcome to Our Public Portal</h2>
-        <p>Interact with the website below. Every action sends automated telemetry logs to the ML security backend.</p>
+        <h2>Welcome to Our Visitor Portal</h2>
+        <p>Click any button below to generate user traffic telemetry and send it to the ML backend engine.</p>
+        
         <button onclick="sendActivity('/home', 250, 200, 'Mozilla/5.0')">Browse Home Page</button>
-        <button onclick="sendActivity('/login', 1200, 200, 'Mozilla/5.0')">Attempt Login</button>
+        <button class="warning" onclick="sendActivity('/login', 1200, 401, 'Mozilla/5.0')">Failed Login Attempt</button>
         <button class="danger" onclick="sendActivity('/admin/db_export', 95000, 403, 'Nmap Scripting Engine')">Trigger Suspicious Scan</button>
-        <div id="response" style="margin-top:20px; font-weight:bold;"></div>
+        
+        <div id="response"></div>
     </div>
 
     <script>
         async function sendActivity(path, bytes, code, agent) {
-            const res = await fetch('/api/log-request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    request_path: path,
-                    bytes_transferred: bytes,
-                    response_code: code,
-                    user_agent: agent
-                })
-            });
-            const data = await res.json();
-            document.getElementById('response').innerText = `Backend Output: ${data.threat_classification}`;
+            document.getElementById('response').innerText = 'Analyzing request...';
+            try {
+                const res = await fetch('/api/log-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        request_path: path,
+                        bytes_transferred: bytes,
+                        response_code: code,
+                        user_agent: agent
+                    })
+                });
+                const data = await res.json();
+                document.getElementById('response').innerText = `ML Classification Output: ${data.threat_classification}`;
+            } catch (err) {
+                document.getElementById('response').innerText = 'Error connecting to server.';
+            }
         }
     </script>
 </body>
