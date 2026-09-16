@@ -5,9 +5,11 @@ from pydantic import BaseModel
 import joblib
 import pandas as pd
 from datetime import datetime
+import os
 
 app = FastAPI(title="Real-Time Cybersecurity Threat Engine")
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 # Load trained pipeline
 model_pipeline = joblib.load("best_threat_model.pkl")
